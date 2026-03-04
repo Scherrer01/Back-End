@@ -141,7 +141,7 @@ def decidir_verde():
     fluxo = sensor_fluxo()
     chuva = sensor_chuva()
 
-    if fluxo > 70:
+    if fluxo > 30:
         verde_fluxo_alto()
     elif chuva:
         verde_chuva()
