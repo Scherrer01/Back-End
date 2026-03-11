@@ -5,20 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Desejos extends Model
+class Pedidos extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'cliente_id',
-        'produto',
+        'produto_id',
         'quantidade',
-        'valor',
-        'status'
+        'valor_total'
     ];
-
-    public function cliente()
-    {
-        return $this->belongsTo(Clientes::class);
-    }
 }

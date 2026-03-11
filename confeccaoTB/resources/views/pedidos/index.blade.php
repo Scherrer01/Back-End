@@ -1,14 +1,14 @@
-```blade
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Fornecedores') }}
+                {{ __('Pedidos') }}
             </h2>
 
-            <a href="{{ route('fornecedores.create') }}"
+            <a href="{{ route('pedidos.create') }}"
                class="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700">
-                + Novo Fornecedor
+                + Novo Pedido
             </a>
         </div>
     </x-slot>
@@ -26,24 +26,28 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                    @forelse ($Fornecedores as $fornecedor)
+                    @forelse ($Pedidos as $pedido)
 
                         <div class="border p-5 rounded-lg bg-gray-50 hover:shadow-lg transition">
 
                             <h3 class="font-bold text-lg mb-2">
-                                {{ $fornecedor->nome }}
+                                Pedido #{{ $pedido->id }}
                             </h3>
 
                             <p class="text-sm text-gray-600">
-                                <strong>CNPJ:</strong> {{ $fornecedor->cnpj }}
+                                <strong>Cliente ID:</strong> {{ $pedido->cliente_id }}
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                <strong>Produto ID:</strong> {{ $pedido->produto_id }}
                             </p>
 
                             <p class="text-sm text-indigo-600">
-                                📞 {{ $fornecedor->telefone }}
+                                📦 Quantidade: {{ $pedido->quantidade }}
                             </p>
 
-                            <p class="text-sm text-gray-500">
-                                ✉ {{ $fornecedor->email }}
+                            <p class="text-sm text-green-600 font-semibold">
+                                💰 R$ {{ number_format($pedido->valor_total, 2, ',', '.') }}
                             </p>
 
                         </div>
@@ -51,7 +55,7 @@
                     @empty
 
                         <div class="col-span-full text-center py-10 text-gray-400">
-                            Nenhum fornecedor cadastrado.
+                            Nenhum pedido cadastrado.
                         </div>
 
                     @endforelse
@@ -62,4 +66,3 @@
         </div>
     </div>
 </x-app-layout>
-```

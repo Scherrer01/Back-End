@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Clientes>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Fornecedores>
  */
-class ClientesFactory extends Factory
+class FornecedoresFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,7 +18,7 @@ class ClientesFactory extends Factory
     {
         return [
             'nome' => fake()->text(),
-            'cpf' => fake()->text(),
+            'cnpj' => fake()->text(),
             'email' => fake()->text(),
             'telefone' => fake()->text(),
             'endereco' => fake()->text(),
