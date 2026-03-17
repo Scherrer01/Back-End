@@ -27,32 +27,22 @@ class EstoqueController extends Controller
         return redirect()->route('estoque.index')->with('success', 'Estoque cadastrado com sucesso!');
     }
 
-    /**
-     * Exibe o formulário para editar um registro de estoque
-     */
     public function edit(Estoque $estoque){
         return view('estoque.edit', compact('estoque'));
     }
 
-    /**
-     * Atualiza um registro de estoque específico
-     */
-    public function update(Request $request, Estoque $estoque) {
+    public function update(Request $request, Estoque $estoque){
         $request->validate([
-            'produto_id' => 'required|integer',
+           'produto_id' => 'required|integer',
             'quantidade' => 'required|integer',
         ]);
 
         $estoque->update($request->all());
-        
-        return redirect()->route('estoque.index')->with('success', 'Estoque atualizado com sucesso!');
+        return redirect()->route('estoque.index')->with('success', 'Produto atualizado com sucesso!');
     }
 
-    /**
-     * Remove um registro de estoque específico
-     */
     public function destroy(Estoque $estoque){
         $estoque->delete();
-        return redirect()->route('estoque.index')->with('success', 'Estoque removido com sucesso!');
+        return redirect()->route('estoque.index')->with('success', 'Produto removido com sucesso!');
     }
 }
