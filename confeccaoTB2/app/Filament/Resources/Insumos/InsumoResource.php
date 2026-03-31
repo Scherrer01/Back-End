@@ -6,8 +6,12 @@ use App\Filament\Resources\Insumos\Pages\CreateInsumo;
 use App\Filament\Resources\Insumos\Pages\EditInsumo;
 use App\Filament\Resources\Insumos\Pages\ListInsumos;
 use App\Filament\Resources\Insumos\Pages\ViewInsumo;
+use App\Filament\Resources\Insumos\Schemas\InsumoForm;
+use App\Filament\Resources\Insumos\Schemas\InsumoInfolist;
+use App\Filament\Resources\Insumos\Tables\InsumosTable;
 use App\Models\Insumo;
 use BackedEnum;
+use Filament\Support\RawJs;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\Resource;
@@ -19,47 +23,36 @@ class InsumoResource extends Resource
 {
     protected static ?string $model = Insumo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Insumos';
+    protected static ?string $recordTitleAttribute = 'Insumo';
 
     public static function form(Schema $schema): Schema
     {
+        return InsumoForm::configure($schema);
         return $schema
         ->schema([
-            TextInput::make('nome')->required()->label('Nome do Insumo'),
-            TextInput::make('unidade_medida')->required()->label('Unidade de Medida'),
-            TextInput::make('preco_custo')
-                ->required()
-                ->label('Preço de Custo')
-                ->prefix('R$')
-                ->numeric()
-                ->inputMode('decimal')
-                ->step(0.01)
-                ->formatStateUsing(fn ($state) => number_format($state, 2, ',', '.'))
-                ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', str_replace('.', '', $state))),
-            TextInput::make('estoque')
-                ->label('Estoque')
-                ->numeric()
-                ->default(0)
-                ->step(0.01),
+            textinput::make('nome')->required(),
+            textinput::make('unidade_medida')->required()->label('Unidade (KG, Metros, Un...)'),
+            textinput::make('preco_custo')->numeric()->prefix('R$')->label('Preço de custo'),
+            textinput::make('estoque')->numeric()->default(0),
         ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return InsumoInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
+        // return InsumosTable::configure($table);
         return $table
         ->columns([
-            TextColumn::make('nome')->searchable(),
-            TextColumn::make('unidade_medida')->label('Unidade'),
-            TextColumn::make('preco_custo')
-                ->label('Preço Custo')
-                ->money('BRL')
-                ->sortable(),
-            TextColumn::make('estoque')
-                ->label('Estoque')
-                ->numeric(decimalPlaces: 2)
-                ->sortable(),
+            Textcolumn::make('nome')->searchable(),
+            Textcolumn::make('unidade_medida'),
+            Textcolumn::make('preco_custo')->money('BRL'),
+            Textcolumn::make('estoque'),
         ]);
     }
 

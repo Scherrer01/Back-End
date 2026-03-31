@@ -16,7 +16,6 @@ class InsumoForm
                 TextInput::make('unidade_medida')
                     ->required(),
                 TextInput::make('preco_custo')
-                    ->required()
                     ->numeric(),
                 TextInput::make('estoque')
                     ->required()

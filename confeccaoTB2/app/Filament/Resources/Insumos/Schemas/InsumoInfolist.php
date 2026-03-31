@@ -14,7 +14,8 @@ class InsumoInfolist
                 TextEntry::make('nome'),
                 TextEntry::make('unidade_medida'),
                 TextEntry::make('preco_custo')
-                    ->numeric(),
+                    ->numeric()
+                    ->placeholder('-'),
                 TextEntry::make('estoque')
                     ->numeric(),
                 TextEntry::make('created_at')

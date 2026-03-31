@@ -6,8 +6,12 @@ use App\Filament\Resources\Produtos\Pages\CreateProduto;
 use App\Filament\Resources\Produtos\Pages\EditProduto;
 use App\Filament\Resources\Produtos\Pages\ListProdutos;
 use App\Filament\Resources\Produtos\Pages\ViewProduto;
+use App\Filament\Resources\Produtos\Schemas\ProdutoForm;
+use App\Filament\Resources\Produtos\Schemas\ProdutoInfolist;
+use App\Filament\Resources\Produtos\Tables\ProdutosTable;
 use App\Models\Produto;
 use BackedEnum;
+use Filament\Support\RawJs;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\Resource;
@@ -19,47 +23,36 @@ class ProdutoResource extends Resource
 {
     protected static ?string $model = Produto::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Produtos';
+    protected static ?string $recordTitleAttribute = 'Produto';
 
     public static function form(Schema $schema): Schema
     {
+        // return ProdutoForm::configure($schema);
         return $schema
         ->schema([
-            TextInput::make('nome')->required()->label('Nome do Produto'),
-            TextInput::make('referecia')->label('Referência')->nullable(),
-            TextInput::make('preco_venda')
-                ->label('Preço de Venda')
-                ->prefix('R$')
-                ->numeric()
-                ->nullable()
-                ->inputMode('decimal')
-                ->step(0.01)
-                ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, ',', '.') : null)
-                ->dehydrateStateUsing(fn ($state) => $state ? str_replace(',', '.', str_replace('.', '', $state)) : null),
-            TextInput::make('estoque')
-                ->label('Estoque')
-                ->numeric()
-                ->default(0)
-                ->integer(),
+        TextInput::make('nome')->required(),
+            TextInput::make('referencia')->required()->label('Descrição'),
+            TextInput::make('preco_venda')->numeric()->prefix('R$')->label('Preço de venda'),
+            Textinput::make('estoque')->numeric()->default(0),
         ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ProdutoInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
+        // return ProdutosTable::configure($table);
         return $table
         ->columns([
-            TextColumn::make('nome')->searchable(),
-            TextColumn::make('referecia')->label('Referência')->searchable(),
-            TextColumn::make('preco_venda')
-                ->label('Preço Venda')
-                ->money('BRL')
-                ->sortable(),
-            TextColumn::make('estoque')
-                ->label('Estoque')
-                ->numeric()
-                ->sortable(),
+            Textcolumn::make('nome')->searchable(),
+            TextColumn::make('referencia'),
+            TextColumn::make('preco_venda')->money('BRL'),
+            TextColumn::make('estoque'),
         ]);
     }
 

@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Filament\Resources\Clientes\Schemas;
+namespace App\Filament\Resources\Pedidos\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
-class ClienteInfolist
+class PedidoInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextEntry::make('nome'),
-                TextEntry::make('email')
-                    ->label('Email address'),
-                TextEntry::make('telefone'),
-                TextEntry::make('documento'),
+                TextEntry::make('cliente_id')
+                    ->numeric(),
+                TextEntry::make('status'),
+                TextEntry::make('valor_total')
+                    ->numeric()
+                    ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

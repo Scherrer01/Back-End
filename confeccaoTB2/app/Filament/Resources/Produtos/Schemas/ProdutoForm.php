@@ -13,7 +13,7 @@ class ProdutoForm
             ->components([
                 TextInput::make('nome')
                     ->required(),
-                TextInput::make('referecia'),
+                TextInput::make('referencia'),
                 TextInput::make('preco_venda')
                     ->numeric(),
                 TextInput::make('estoque')

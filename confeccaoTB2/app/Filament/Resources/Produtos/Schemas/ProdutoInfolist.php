@@ -12,7 +12,7 @@ class ProdutoInfolist
         return $schema
             ->components([
                 TextEntry::make('nome'),
-                TextEntry::make('referecia')
+                TextEntry::make('referencia')
                     ->placeholder('-'),
                 TextEntry::make('preco_venda')
                     ->numeric()

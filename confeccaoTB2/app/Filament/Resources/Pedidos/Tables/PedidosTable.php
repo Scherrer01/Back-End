@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Fornecedors\Tables;
+namespace App\Filament\Resources\Pedidos\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -9,21 +9,20 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class FornecedorsTable
+class PedidosTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('nome')
+                TextColumn::make('cliente_id')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('status')
                     ->searchable(),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
-                TextColumn::make('telefone')
-                    ->searchable(),
-                TextColumn::make('documento')
-                    ->searchable(),
+                TextColumn::make('valor_total')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

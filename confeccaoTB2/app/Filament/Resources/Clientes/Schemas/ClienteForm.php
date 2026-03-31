@@ -15,10 +15,13 @@ class ClienteForm
                     ->required(),
                 TextInput::make('email')
                     ->label('Email address')
-                    ->email(),
+                    ->email()
+                    ->required(),
                 TextInput::make('telefone')
-                    ->tel(),
-                TextInput::make('documento'),
+                    ->tel()
+                    ->required(),
+                TextInput::make('documento')
+                    ->required(),
             ]);
     }
 }

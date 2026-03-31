@@ -11,9 +11,9 @@ use App\Filament\Resources\Clientes\Schemas\ClienteInfolist;
 use App\Filament\Resources\Clientes\Tables\ClientesTable;
 use App\Models\Cliente;
 use BackedEnum;
+use Filament\Support\RawJs;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Support\RawJs;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -32,12 +32,12 @@ class ClienteResource extends Resource
         // return ClienteForm::configure($schema);
         return $schema
         ->schema([
-            TextInput::make('nome')->required()->label('Nome Completo'),
+            TextInput::make('nome')->required()->label('Nome completo'),
             TextInput::make('email')->email()->label('E-mail'),
-            TextInput::make('telefone')->tel()->label('Telefone/Zap')->mask('(99) 99999-9999'),
-            TextInput::make('documento')->label('CPF ou CNPJ')->mask(RawJs::make(<<<'JS'
-                $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99'
-                JS)),
+            TextInput::make('telefone')->tel()->label('Telefone')->mask('(99) 99999-9999'),
+            TextInput::make('documento')->required()->label('CPF ou CNPJ')->mask(RawJs::make(<<<'JS'
+             $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99' 
+             JS)),
         ]);
     }
 
@@ -49,13 +49,12 @@ class ClienteResource extends Resource
     public static function table(Table $table): Table
     {
         return ClientesTable::configure($table);
-        return ClientesTable::configure($table);
         return $table
         ->columns([
-            TextColumn::make('nome')->searchable(),
-            TextColumn::make('email')->searchable(),
-            TextColumn::make('telefone'),
-            TextColumn::make('documento'),
+            Textcolumn::make('nome')->searchable(),
+            Textcolumn::make('email')->searchable(),
+            Textcolumn::make('telefone'),
+            Textcolumn::make('documento'),
         ]);
     }
 

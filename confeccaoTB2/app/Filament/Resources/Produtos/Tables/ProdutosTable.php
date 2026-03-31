@@ -17,7 +17,7 @@ class ProdutosTable
             ->columns([
                 TextColumn::make('nome')
                     ->searchable(),
-                TextColumn::make('referecia')
+                TextColumn::make('referencia')
                     ->searchable(),
                 TextColumn::make('preco_venda')
                     ->numeric()
