@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+
+
+Route::get('userdex', [UsuariosController::class, 'index']);
 
 // GET: Buscar todos os usuários
 Route::get('usuarios', function () {
