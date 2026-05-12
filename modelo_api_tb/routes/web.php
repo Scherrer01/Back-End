@@ -1,131 +1,65 @@
 <?php
 
-use App\Http\Controllers\UsuariosController;
+use App\Http\Controllers\PokemonController;
+use App\Models\Pokemon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 
+route::get('pokedex', [PokemonController::class, 'index']);
 
-Route::get('userdex', [UsuariosController::class, 'index']);
-
-// GET: Buscar todos os usuários
-Route::get('usuarios', function () {
-    $response = Http::get("https://dummyjson.com/users");
-    
-    if ($response->successful()) {
-        $dados = $response->json();
-        
-        // Simplificando os dados para retornar apenas informações principais
-        $usuarios = array_map(function($user) {
-            return [
-                'id' => $user['id'],
-                'nome_completo' => $user['firstName'] . ' ' . $user['lastName'],
-                'email' => $user['email'],
-                'idade' => $user['age'],
-                'genero' => $user['gender'],
-                'foto' => $user['image']
-            ];
-        }, $dados['users']);
-        
-        return response()->json([
-            'status' => 'Conectado com sucesso!',
-            'total_usuarios' => $dados['total'],
-            'usuarios' => $usuarios
-        ], 200);
+// Busca Pokémon no banco local (deve vir antes do wildcard {nome})
+Route::get('pokemon/local/{nome}', function ($nome) {
+    $pokemon = Pokemon::whereRaw('LOWER(nome) = ?', [strtolower($nome)])->first();
+    if (!$pokemon) {
+        return response()->json(['erro' => 'Pokémon não encontrado no banco local'], 404);
     }
-    
-    return response()->json(['erro' => 'Não foi possível buscar os usuários'], 500);
+    return response()->json($pokemon);
 });
 
-// GET: Buscar usuário específico por ID
-Route::get('usuario/{id}', function ($id) {
-    $response = Http::get("https://dummyjson.com/users/{$id}");
-    
+//Exemplo 1: GET
+Route::get('pokemon/{nome}', function ($nome) {
+    $response = Http::get("https://pokeapi.co/api/v2/pokemon/{$nome}");
+
     if ($response->successful()) {
-        $user = $response->json();
-        
+        $dados = $response->json();
         return response()->json([
-            'status' => 'Usuário encontrado!',
-            'usuario' => [
-                'id' => $user['id'],
-                'nome' => $user['firstName'],
-                'sobrenome' => $user['lastName'],
-                'nome_completo' => $user['firstName'] . ' ' . $user['lastName'],
-                'email' => $user['email'],
-                'telefone' => $user['phone'],
-                'idade' => $user['age'],
-                'genero' => $user['gender'],
-                'data_nascimento' => $user['birthDate'],
-                'foto' => $user['image'],
-                'endereco' => $user['address']['address'] . ', ' . $user['address']['city'] . ' - ' . $user['address']['country']
+            'status' => 'Conectado com sucesso!',
+            'resultado' => [
+                'identificador' => $dados['id'],
+                'nome_do_pokemon' => ucfirst($dados['name']),
+                'foto' => $dados['sprites']['front_default']
             ]
         ], 200);
     }
-    
-    return response()->json(['erro' => 'Usuário não encontrado'], 404);
+    return response()->json(['erro' => 'Pokemon não encontrado'], 404);
 });
 
-// POST: Cadastrar novo usuário
-Route::post('usuario/novo', function (Request $request) {
-    // Validando os dados recebidos
+// Exemplo 2: POST
+Route::post('pokemon/novo', function (Request $request) {
     $dados = $request->validate([
-        'firstName' => 'required|string|min:2|max:50',
-        'lastName' => 'required|string|min:2|max:50',
-        'email' => 'required|email',
-        'age' => 'required|integer|min:0|max:150',
-        'gender' => 'required|in:male,female',
-        'phone' => 'required|string',
-        'birthDate' => 'required|date',
-        'address' => 'required|array',
-        'address.address' => 'required|string',
-        'address.city' => 'required|string',
-        'address.country' => 'required|string'
+        'nome'            => 'required|string|min:3|unique:pokemons,nome',
+        'tipo'            => 'required|string',
+        'ataque'          => 'required|integer|min:1|max:999',
+        'hp'              => 'required|integer|min:1|max:999',
+        'defesa'          => 'required|integer|min:1|max:999',
+        'ataque_especial' => 'required|integer|min:1|max:999',
+        'defesa_especial' => 'required|integer|min:1|max:999',
+        'velocidade'      => 'required|integer|min:1|max:999',
+        'sprite'          => 'nullable|string',
+        'moves'           => 'nullable|array',
+        'moves.*.nome'    => 'required|string',
+        'moves.*.tipo'    => 'required|string',
     ]);
-    
-    // Simulando o cadastro (API fake não persiste dados)
-    $novoId = rand(1000, 9999);
-    
+
+    $pokemon = Pokemon::create($dados);
+
     return response()->json([
-        'mensagem' => 'Usuário cadastrado com sucesso!',
-        'status' => 'success',
-        'id_gerado' => $novoId,
-        'dados_enviados' => $dados,
-        'observacao' => 'Como é uma API fake (dummyjson.com), os dados não são realmente persistidos. Em produção, você salvaria no banco de dados.'
+        'mensagem'        => 'Pokemon cadastrado com sucesso!',
+        'dados_salvos'    => $pokemon,
     ], 201);
 });
 
-// GET: Buscar usuários por filtros (exemplo: por nome)
-Route::get('usuarios/buscar', function (Request $request) {
-    $nome = $request->query('nome');
-    
-    if (!$nome) {
-        return response()->json(['erro' => 'Parâmetro "nome" é obrigatório'], 400);
-    }
-    
-    $response = Http::get("https://dummyjson.com/users/search?q={$nome}");
-    
-    if ($response->successful()) {
-        $dados = $response->json();
-        
-        $usuarios = array_map(function($user) {
-            return [
-                'id' => $user['id'],
-                'nome_completo' => $user['firstName'] . ' ' . $user['lastName'],
-                'email' => $user['email']
-            ];
-        }, $dados['users']);
-        
-        return response()->json([
-            'status' => 'Busca realizada com sucesso!',
-            'total_encontrados' => $dados['total'],
-            'usuarios' => $usuarios
-        ], 200);
-    }
-    
-    return response()->json(['erro' => 'Erro na busca'], 500);
-});
-
-// Rota principal
 Route::get('/', function () {
     return view('welcome');
 });

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Pokédex Master - Com Tipos de Ataques</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -216,7 +217,102 @@
             </button>
         </div>
 
+        <!-- Botão Criar Pokémon -->
+        <div class="flex justify-center mt-6" data-aos="fade-up" data-aos-delay="200">
+            <button id="openModalBtn" class="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-xl">
+                <i class="fas fa-plus-circle"></i> Criar Novo Pokémon
+            </button>
+        </div>
+
         
+    </div>
+
+    <!-- Modal Criar Pokémon -->
+    <div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/40 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                    <i class="fas fa-plus-circle text-purple-400"></i> Novo Pokémon
+                </h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+
+            <div id="modalFeedback" class="hidden mb-4 rounded-xl px-4 py-3 text-sm font-semibold"></div>
+
+            <form id="createPokemonForm" class="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+
+                {{-- Identidade --}}
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-gray-300 text-xs font-semibold mb-1 uppercase tracking-wide">Nome <span class="text-red-400">*</span></label>
+                        <input type="text" name="nome" placeholder="ex: Fakemon" required minlength="3"
+                            class="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:bg-white/20 transition">
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 text-xs font-semibold mb-1 uppercase tracking-wide">Tipo <span class="text-red-400">*</span></label>
+                        <select name="tipo" required
+                            class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-white/20 text-white transition focus:ring-2 focus:ring-purple-500">
+                            <option value="">Selecione</option>
+                            @foreach(['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'] as $t)
+                                <option value="{{ $t }}">{{ ucfirst($t) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 text-xs font-semibold mb-1 uppercase tracking-wide">Sprite URL <span class="text-gray-500">(opcional)</span></label>
+                        <input type="text" name="sprite" placeholder="https://..."
+                            class="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:bg-white/20 transition">
+                    </div>
+                </div>
+
+                {{-- Stats --}}
+                <div>
+                    <p class="text-gray-300 text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-purple-400"></i> Estatísticas Base
+                    </p>
+                    <div class="space-y-2">
+                        @foreach([
+                            ['hp',              'HP (Vida)',         'text-green-400'],
+                            ['ataque',          'Ataque',            'text-red-400'],
+                            ['defesa',          'Defesa',            'text-blue-400'],
+                            ['ataque_especial', 'Ataque Especial',   'text-purple-400'],
+                            ['defesa_especial', 'Defesa Especial',   'text-cyan-400'],
+                            ['velocidade',      'Velocidade',        'text-yellow-400'],
+                        ] as [$stat, $label, $color])
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-400 text-xs w-28 shrink-0">{{ $label }}</span>
+                            <input type="range" name="{{ $stat }}" min="1" max="255" value="50"
+                                class="flex-1 accent-purple-500"
+                                oninput="this.nextElementSibling.textContent = this.value">
+                            <span class="{{ $color }} font-bold text-sm w-8 text-right">50</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Ataques --}}
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-gray-300 text-xs font-semibold uppercase tracking-wide flex items-center gap-2">
+                            <i class="fas fa-fist-raised text-purple-400"></i> Ataques
+                        </p>
+                        <button type="button" id="addMoveBtn"
+                            class="text-xs bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded-lg transition flex items-center gap-1">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div id="movesList" class="space-y-2">
+                        {{-- linhas adicionadas via JS --}}
+                    </div>
+                    <p id="movesEmpty" class="text-gray-500 text-xs text-center py-2">Nenhum ataque adicionado ainda.</p>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white py-3 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> Salvar Pokémon
+                </button>
+            </form>
+        </div>
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -332,18 +428,21 @@
                 renderEvolutionsTab();
                 
             } catch (error) {
-                const errorHtml = `
-                    <div class="text-center py-10">
-                        <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-                        <h3 class="text-2xl font-bold text-white mb-2">Pokémon não encontrado!</h3>
-                        <p class="text-gray-300">"${identifier}" não está na Pokédex.</p>
-                        <button onclick="loadPokemon('pikachu')" class="mt-4 bg-gradient-to-r from-red-500 to-red-700 px-6 py-2 rounded-lg font-bold text-white">Carregar Pikachu</button>
-                    </div>
-                `;
-                document.getElementById('statusContent').innerHTML = errorHtml;
-                document.getElementById('movesContent').innerHTML = errorHtml;
-                document.getElementById('evolutionsContent').innerHTML = errorHtml;
-                document.getElementById('pokemonHeaderArea').innerHTML = '';
+                const foundLocally = await loadLocalPokemon(identifier);
+                if (!foundLocally) {
+                    const errorHtml = `
+                        <div class="text-center py-10">
+                            <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                            <h3 class="text-2xl font-bold text-white mb-2">Pokémon não encontrado!</h3>
+                            <p class="text-gray-300">"${identifier}" não está na Pokédex nem no banco local.</p>
+                            <button onclick="loadPokemon('pikachu')" class="mt-4 bg-gradient-to-r from-red-500 to-red-700 px-6 py-2 rounded-lg font-bold text-white">Carregar Pikachu</button>
+                        </div>
+                    `;
+                    document.getElementById('statusContent').innerHTML = errorHtml;
+                    document.getElementById('movesContent').innerHTML = errorHtml;
+                    document.getElementById('evolutionsContent').innerHTML = errorHtml;
+                    document.getElementById('pokemonHeaderArea').innerHTML = '';
+                }
             }
         }
         
@@ -556,7 +655,102 @@
         }
         
         window.loadPokemon = loadPokemon;
-        
+
+        async function loadLocalPokemon(identifier) {
+            try {
+                const res = await fetch(`/pokemon/local/${encodeURIComponent(identifier)}`);
+                if (!res.ok) return false;
+                const p = await res.json();
+                displayLocalPokemon(p);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function displayLocalPokemon(p) {
+            const name = p.nome.charAt(0).toUpperCase() + p.nome.slice(1);
+            const spriteHtml = p.sprite
+                ? `<img src="${p.sprite}" alt="${name}" class="w-48 h-48 object-contain drop-shadow-2xl">`
+                : `<div class="w-48 h-48 flex items-center justify-center text-7xl">❓</div>`;
+
+            document.getElementById('pokemonHeaderArea').innerHTML = `
+                <div class="bg-gradient-to-br from-purple-900/60 to-gray-900/80 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/40">
+                    <div class="flex flex-col md:flex-row gap-6 items-center">
+                        <div class="bg-white/5 rounded-2xl p-4">${spriteHtml}</div>
+                        <div class="flex-1 text-center md:text-left">
+                            <div class="inline-block bg-purple-900/50 px-3 py-1 rounded-full mb-2">
+                                <span class="text-purple-400 font-mono font-bold">Pokémon Customizado · ID ${p.id}</span>
+                            </div>
+                            <h2 class="text-4xl font-black text-white mb-2">${name}</h2>
+                            <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                <span class="type-${p.tipo} px-4 py-1 rounded-full text-sm font-bold shadow-md capitalize">${p.tipo}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // --- Aba Status ---
+            const stats = [
+                { name: 'HP (Vida)',         value: p.hp },
+                { name: 'Ataque',            value: p.ataque },
+                { name: 'Defesa',            value: p.defesa },
+                { name: 'Ataque Especial',   value: p.ataque_especial },
+                { name: 'Defesa Especial',   value: p.defesa_especial },
+                { name: 'Velocidade',        value: p.velocidade },
+            ];
+            document.getElementById('statusContent').innerHTML = `
+                <div class="space-y-3">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-line text-purple-400"></i> Estatísticas Base
+                    </h3>
+                    ${stats.map(s => `
+                        <div>
+                            <div class="flex justify-between text-gray-200 mb-1">
+                                <span class="font-semibold">${s.name}</span>
+                                <span class="text-purple-400 font-bold">${s.value ?? '—'}</span>
+                            </div>
+                            <div class="stat-bar-bg">
+                                <div class="stat-fill" style="width:${Math.min(100,(s.value??0)/2.55)}%; background: linear-gradient(90deg,#9333ea,#7e22ce)"></div>
+                            </div>
+                        </div>`).join('')}
+                </div>`;
+
+            // --- Aba Ataques ---
+            const moves = p.moves && p.moves.length > 0 ? p.moves : null;
+            document.getElementById('movesContent').innerHTML = moves ? `
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fas fa-fist-raised text-purple-400"></i> Lista de Ataques
+                        </h3>
+                        <span class="text-gray-400 text-sm">Total: ${moves.length} movimentos</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${moves.map(m => `
+                            <div class="move-card bg-gray-800/50 hover:bg-gray-700/70 transition rounded-lg p-3 flex items-center justify-between border border-gray-700">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-bolt text-purple-400 text-sm"></i>
+                                    <span class="text-gray-100 font-medium capitalize">${m.nome}</span>
+                                </div>
+                                <span class="move-type-${m.tipo} px-3 py-1 rounded-full text-xs font-bold shadow-md capitalize">${m.tipo}</span>
+                            </div>`).join('')}
+                    </div>
+                </div>` : `
+                <div class="text-center py-10">
+                    <i class="fas fa-fist-raised text-5xl text-gray-500 mb-3"></i>
+                    <p class="text-gray-400">Este Pokémon não possui ataques registrados.</p>
+                </div>`;
+
+            // --- Aba Evoluções ---
+            document.getElementById('evolutionsContent').innerHTML = `
+                <div class="text-center py-10">
+                    <i class="fas fa-ban text-5xl text-gray-500 mb-3"></i>
+                    <p class="text-gray-300 text-lg">Pokémon customizado — sem cadeia evolutiva.</p>
+                </div>`;
+        }
+
         document.getElementById('prevBtn').addEventListener('click', () => changePokemon(-1));
         document.getElementById('nextBtn').addEventListener('click', () => changePokemon(1));
         document.getElementById('randomBtn').addEventListener('click', () => randomPokemon());
@@ -570,6 +764,108 @@
         
         setupTabs();
         loadPokemon('pikachu');
+
+        // Modal Criar Pokémon
+        const modal = document.getElementById('createModal');
+        document.getElementById('openModalBtn').addEventListener('click', () => {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        });
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('modalFeedback').classList.add('hidden');
+            document.getElementById('createPokemonForm').reset();
+            document.getElementById('movesList').innerHTML = '';
+            document.getElementById('movesEmpty').classList.remove('hidden');
+        };
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        const tipos = ['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+        const tipoOptions = tipos.map(t => `<option value="${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</option>`).join('');
+
+        document.getElementById('addMoveBtn').addEventListener('click', () => {
+            document.getElementById('movesEmpty').classList.add('hidden');
+            const row = document.createElement('div');
+            row.className = 'move-row flex gap-2 items-center';
+            row.innerHTML = `
+                <input type="text" placeholder="Nome do ataque" required
+                    class="move-name flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-500 text-sm focus:bg-white/20 transition">
+                <select class="move-tipo px-3 py-2 rounded-lg bg-gray-800 border border-white/20 text-white text-sm">
+                    ${tipoOptions}
+                </select>
+                <button type="button" class="text-red-400 hover:text-red-300 transition px-1 remove-move">
+                    <i class="fas fa-times"></i>
+                </button>`;
+            row.querySelector('.remove-move').addEventListener('click', () => {
+                row.remove();
+                if (!document.querySelectorAll('#movesList .move-row').length)
+                    document.getElementById('movesEmpty').classList.remove('hidden');
+            });
+            document.getElementById('movesList').appendChild(row);
+        });
+
+        document.getElementById('createPokemonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const feedback = document.getElementById('modalFeedback');
+            const form = e.target;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+            const moves = [...document.querySelectorAll('#movesList .move-row')].map(row => ({
+                nome: row.querySelector('.move-name').value.trim(),
+                tipo: row.querySelector('.move-tipo').value,
+            })).filter(m => m.nome && m.tipo);
+
+            const body = {
+                nome:            form.nome.value,
+                tipo:            form.tipo.value,
+                hp:              parseInt(form.hp.value),
+                ataque:          parseInt(form.ataque.value),
+                defesa:          parseInt(form.defesa.value),
+                ataque_especial: parseInt(form.ataque_especial.value),
+                defesa_especial: parseInt(form.defesa_especial.value),
+                velocidade:      parseInt(form.velocidade.value),
+                sprite:          form.sprite.value || null,
+                moves:           moves.length ? moves : null,
+            };
+
+            try {
+                const res = await fetch('/pokemon/novo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    feedback.className = 'mb-4 rounded-xl px-4 py-3 text-sm font-semibold bg-green-500/20 border border-green-500/40 text-green-300';
+                    feedback.textContent = `✓ ${data.mensagem} (ID: ${data.dados_salvos.id})`;
+                    feedback.classList.remove('hidden');
+                    form.reset();
+                } else {
+                    const erros = data.errors ? Object.values(data.errors).flat().join(' | ') : (data.message || 'Erro ao salvar.');
+                    feedback.className = 'mb-4 rounded-xl px-4 py-3 text-sm font-semibold bg-red-500/20 border border-red-500/40 text-red-300';
+                    feedback.textContent = '✗ ' + erros;
+                    feedback.classList.remove('hidden');
+                }
+            } catch (err) {
+                feedback.className = 'mb-4 rounded-xl px-4 py-3 text-sm font-semibold bg-red-500/20 border border-red-500/40 text-red-300';
+                feedback.textContent = '✗ Erro de conexão. Tente novamente.';
+                feedback.classList.remove('hidden');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Salvar Pokémon';
+        });
     </script>
 </body>
 </html>
